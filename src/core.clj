@@ -4,7 +4,7 @@
    [cheshire.core :as json]
    [clj-http.client :as client]
    [ring.adapter.jetty :refer [run-jetty]]
-   [ring.util.response :refer [response]]))
+   [ring.util.response :refer [response status]]))
 
 (def telegram-token (System/getenv "TELEGRAM_TOKEN"))
 (def chat-id (System/getenv "TELEGRAM_CHAT_ID"))
@@ -93,7 +93,8 @@
 (defn app [request]
   (case (:uri request)
     "/webhook" (handle-webhook request)
-    (response "Not Found")))
+    (-> (response "Не найдено")
+        (status 404))))
 
 (defn -main []
   (println "Сервер запущен на порту" port)
