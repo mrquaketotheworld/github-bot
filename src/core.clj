@@ -26,7 +26,7 @@
         user (:login (:user pull_request))]
     (cond
       (= action "opened")
-      (send-telegram-message (str "📢 Новый пулл-реквест от " user
+      (send-telegram-message (str "📢 Новый PR от " user
                                   "\nНазвание: " title
                                   "\nСсылка: " pr-url
                                   "\nИз ветки: " source-branch-name
@@ -34,11 +34,11 @@
       (= action "review_requested")
       (let [reviewer (:login requested_reviewer)]
         (send-telegram-message (str "👀 Назначен новый ревьюер: " reviewer
-                                    "\nПулл-реквест: " title
+                                    "\nPR: " title
                                     "\nСсылка: " pr-url)))
 
       (and (= action "closed") (:merged pull_request))
-      (send-telegram-message (str "✅ Пулл-реквест замержен от " user
+      (send-telegram-message (str "✅ PR замержен от " user
                                   "\nНазвание: " title
                                   "\nСсылка: " pr-url
                                   "\nВетки: " source-branch-name " → " target-branch-name)))))
@@ -52,7 +52,7 @@
     (case review-state
       "approved"
       (send-telegram-message (str "✅ Ревью принято от " reviewer
-                                  "\nПулл-реквест: " pr-title
+                                  "\nPR: " pr-title
                                   "\nСсылка: " pr-url)))))
 
 (defn handle-review-comment [payload]
@@ -63,7 +63,7 @@
         pr-url (:html_url pull_request)]
     (when (= action "created")
       (send-telegram-message (str "💬 Новый комментарий от " commenter
-                                  "\nПулл-реквест: " pr-title
+                                  "\nPR: " pr-title
                                   "\nТекст: " comment-body
                                   "\nСсылка: " pr-url)))))
 
@@ -73,8 +73,8 @@
         pr-url (:html_url pull_request)
         author (:login (:user pull_request))]
     (when (= action "resolved")
-      (send-telegram-message (str "🔒 Обсуждение разрешено в PR от " author
-                                  "\nПулл-реквест: " pr-title
+      (send-telegram-message (str "🔒 Обсуждение зарезолвлено в PR от " author
+                                  "\nPR: " pr-title
                                   "\nСсылка: " pr-url)))))
 
 (defn handle-webhook [request]
