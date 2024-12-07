@@ -1,4 +1,5 @@
 (ns core
+  (:gen-class)
   (:require
    [cheshire.core :as json]
    [clj-http.client :as client]
