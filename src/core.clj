@@ -2,25 +2,12 @@
   (:require
    [cheshire.core :as json]
    [clj-http.client :as client]
-   [clojure.string :as string]
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.util.response :refer [response]]))
 
-(defn load-env [file]
-  (->> (slurp file)
-       (string/split-lines)
-       (map #(string/split % #"=" 2))
-       (into {})))
+(def telegram-token (System/getenv "TELEGRAM_TOKEN"))
+(def chat-id (System/getenv "TELEGRAM_CHAT_ID"))
 
-(def env (load-env ".env"))
-(def telegram-token (get env "TELEGRAM_TOKEN"))
-(def chat-id (get env "TELEGRAM_CHAT_ID"))
-(println telegram-token chat-id)
-;; Настройки бота
-; (def telegram-token "7309234639:AAF32VJ2XSIbFi1uGy15Qj82aKULdEWceQs")
-; (def chat-id "-4713741035")
-
-;; Отправка сообщения в Telegram
 (defn send-telegram-message [message]
   (let [url (str "https://api.telegram.org/bot" telegram-token "/sendMessage")]
     (client/post url {:form-params {:chat_id chat-id
@@ -36,7 +23,6 @@
         target-branch-name (:ref target-branch)
         user (:login (:user pull_request))]
     (cond
-      ;; Новый PR
       (= action "opened")
       (send-telegram-message (str "📢 Новый пулл-реквест от " user
                                   "\nНазвание: " title
@@ -49,7 +35,6 @@
                                     "\nПулл-реквест: " title
                                     "\nСсылка: " pr-url)))
 
-      ;; Мерж
       (and (= action "closed") (:merged pull_request))
       (send-telegram-message (str "✅ Пулл-реквест замержен от " user
                                   "\nНазвание: " title
@@ -90,7 +75,6 @@
                                   "\nПулл-реквест: " pr-title
                                   "\nСсылка: " pr-url)))))
 
-;; Обработка вебхука
 (defn handle-webhook [request]
   (if (= (:request-method request) :post)
     (let [payload (json/parse-string (slurp (:body request)) true)
@@ -102,15 +86,13 @@
         "pull_request_review_thread" (handle-review-thread payload)
         (println (str "⚠️ Неизвестное событие: " event-type)))
       (response "OK"))
-    (response "Метод не поддерживается" 405)))
+    (response "Метод не поддерживается")))
 
-;; Роутинг
 (defn app [request]
   (case (:uri request)
     "/webhook" (handle-webhook request)
-    (response "Not Found" 404)))
+    (response "Not Found")))
 
-;; Запуск сервера
 (defn -main []
   (println "Сервер запущен на порту 3000")
   (run-jetty app {:port 3000}))
