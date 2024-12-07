@@ -7,6 +7,7 @@
 
 (def telegram-token (System/getenv "TELEGRAM_TOKEN"))
 (def chat-id (System/getenv "TELEGRAM_CHAT_ID"))
+(def port (System/getenv "PORT"))
 
 (defn send-telegram-message [message]
   (let [url (str "https://api.telegram.org/bot" telegram-token "/sendMessage")]
@@ -94,6 +95,6 @@
     (response "Not Found")))
 
 (defn -main []
-  (println "Сервер запущен на порту 3000")
-  (run-jetty app {:port 3000}))
+  (println "Сервер запущен на порту" port)
+  (run-jetty app {:port (Integer/parseInt port)}))
 
