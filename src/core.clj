@@ -18,7 +18,7 @@
 (defn handle-pull-request [payload]
   (let [{:keys [action pull_request requested_reviewer]} payload
         pr-url (:html_url pull_request)
-        title (:title pull_request)
+        pr-title (:title pull_request)
         source-branch (:head pull_request)
         target-branch (:base pull_request)
         source-branch-name (:ref source-branch)
@@ -27,21 +27,20 @@
     (cond
       (= action "opened")
       (send-telegram-message (str "📢 Новый PR от " user
-                                  "\nНазвание: " title
+                                  "\nНазвание: " pr-title
                                   "\nСсылка: " pr-url
-                                  "\nИз ветки: " source-branch-name
-                                  " → " target-branch-name))
+                                  "\nИз ветки: " source-branch-name " → " target-branch-name))
       (= action "review_requested")
       (let [reviewer (:login requested_reviewer)]
-        (send-telegram-message (str "👀 Назначен новый ревьюер: " reviewer
-                                    "\nPR: " title
+        (send-telegram-message (str "👀 Назначен новый PR ревьюер: " reviewer
+                                    "\nНазвание: " pr-title
                                     "\nСсылка: " pr-url)))
 
       (and (= action "closed") (:merged pull_request))
       (send-telegram-message (str "✅ PR замержен от " user
-                                  "\nНазвание: " title
+                                  "\nНазвание: " pr-title
                                   "\nСсылка: " pr-url
-                                  "\nВетки: " source-branch-name " → " target-branch-name)))))
+                                  "\nИз ветки: " source-branch-name " → " target-branch-name)))))
 
 (defn handle-review [payload]
   (let [{:keys [review pull_request]} payload
@@ -51,8 +50,8 @@
         reviewer (:login (:user review))]
     (case review-state
       "approved"
-      (send-telegram-message (str "✅ Ревью принято от " reviewer
-                                  "\nPR: " pr-title
+      (send-telegram-message (str "✅ Ревью PR принято от " reviewer
+                                  "\nНазвание: " pr-title
                                   "\nСсылка: " pr-url)))))
 
 (defn handle-review-comment [payload]
@@ -62,8 +61,8 @@
         pr-title (:title pull_request)
         pr-url (:html_url pull_request)]
     (when (= action "created")
-      (send-telegram-message (str "💬 Новый комментарий от " commenter
-                                  "\nPR: " pr-title
+      (send-telegram-message (str "💬 Новый комментарий PR от " commenter
+                                  "\nНазвание: " pr-title
                                   "\nТекст: " comment-body
                                   "\nСсылка: " pr-url)))))
 
@@ -74,7 +73,7 @@
         author (:login (:user pull_request))]
     (when (= action "resolved")
       (send-telegram-message (str "🔒 Обсуждение зарезолвлено в PR от " author
-                                  "\nPR: " pr-title
+                                  "\nНазвание: " pr-title
                                   "\nСсылка: " pr-url)))))
 
 (defn handle-webhook [request]
