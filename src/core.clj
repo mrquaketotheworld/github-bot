@@ -52,7 +52,7 @@
         reviewer (:login (:user review))]
     (case review-state
       "approved"
-      (send-telegram-message (str "✅ Ревью PR принято от " reviewer
+      (send-telegram-message (str "✅ Ревью PR завершено от " reviewer
                                   "\nНазвание: " pr-title
                                   "\nСсылка: " pr-url)))))
 
