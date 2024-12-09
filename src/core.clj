@@ -8,11 +8,13 @@
 
 (def telegram-token (System/getenv "TELEGRAM_TOKEN"))
 (def chat-id (System/getenv "TELEGRAM_CHAT_ID"))
+(def message-thread-id (System/getenv "TELEGRAM_THREAD_ID"))
 (def port (System/getenv "PORT"))
 
 (defn send-telegram-message [message]
   (let [url (str "https://api.telegram.org/bot" telegram-token "/sendMessage")]
     (client/post url {:form-params {:chat_id chat-id
+                                    :message_thread_id message-thread-id
                                     :text message}})))
 
 (defn handle-pull-request [payload]
